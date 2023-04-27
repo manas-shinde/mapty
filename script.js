@@ -198,6 +198,8 @@ class App {
     // render workout on list
     this._renderWorkout(workout);
 
+    this._drawLine(workout);
+
     this._hideForm();
   }
   _renderWorkoutMarker(workout) {
@@ -216,6 +218,26 @@ class App {
         `${workout.type == 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
       )
       .openPopup();
+  }
+  _drawLine(workout) {
+    // Get the value of the --color-brand--1 variable
+    let colorBrand1 = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue('--color-brand--1');
+
+    // Get the value of the --color-brand--2 variable
+    let colorBrand2 = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue('--color-brand--2');
+
+    // Create a Polyline between the two points with a dotted style
+    let dottedLine = L.polyline([this.#currentLocation, workout.coords], {
+      dashArray: '5, 10', // Set the line to a dotted pattern with a 5px dash followed by a 10px gap
+      color: `${workout.type === 'running' ? colorBrand2 : colorBrand1}`, // Set the color of the line based on workout type
+    });
+
+    // Add the dotted line to the map
+    dottedLine.addTo(this.#map);
   }
 
   _renderWorkout(workout) {
