@@ -63,6 +63,7 @@ class App {
   #mapZoomLevel = 13;
   #mapEvent;
   #workout = [];
+  #currentLocation;
 
   constructor() {
     // Get user's position
@@ -91,9 +92,9 @@ class App {
     console.log(latitude, longitude);
     console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
 
-    let coords = [latitude, longitude];
+    this.#currentLocation = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
+    this.#map = L.map('map').setView(this.#currentLocation, this.#mapZoomLevel);
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -102,8 +103,25 @@ class App {
 
     // Handling click on map
     this.#map.on('click', this._showForm.bind(this));
-  }
 
+    toastMessage('app loaded');
+
+    this._renderCurrentLocationMarker(this.#currentLocation);
+  }
+  _renderCurrentLocationMarker(coords) {
+    L.marker(coords)
+      .addTo(this.#map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+        })
+      )
+      .setPopupContent(`📍 Current Location`)
+      .openPopup();
+  }
   _showForm(mapEv) {
     this.#mapEvent = mapEv;
     form.classList.remove('hidden');
@@ -266,3 +284,16 @@ class App {
 }
 
 const app = new App();
+
+function toastMessage(msg) {
+  const toastContainer = document.createElement('div');
+  toastContainer.classList.add('toast-container');
+  const toastText = document.createElement('p');
+  toastText.classList.add('toast-text');
+  toastText.textContent = `${msg}`;
+  toastContainer.append(toastText);
+  document.querySelector('body').append(toastContainer);
+  setTimeout(() => {
+    toastContainer.remove();
+  }, 1500);
+}
