@@ -1,6 +1,8 @@
 :root {
   --color-brand--1: #ffb545;
   --color-brand--2: #00c46a;
+  --color-brand--3: #c70501;
+  --color-brand--4: #205a97;
 
   --color-dark--1: #2d3439;
   --color-dark--2: #42484d;
@@ -29,7 +31,7 @@ body {
   overscroll-behavior-y: none;
 
   background-color: #fff;
-  padding: 2.5rem;
+  /* padding: 2.5rem; */
 
   display: flex;
 }
@@ -217,4 +219,80 @@ a:visited {
 }
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
+}
+.msg-overlay {
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
+}
+.toast-container {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  padding: 0.5rem 2rem;
+  z-index: 99;
+  background: var(--color-brand--2);
+  border-radius: 5px;
+  animation: toastUp 0.5s linear;
+}
+
+@keyframes toastUp {
+  0% {
+    transform: translateY(35%);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.toast-text {
+  /* font-weight: 700; */
+  font-size: 2em;
+}
+.btn--clear-all {
+  margin-top: 2rem;
+  cursor: pointer;
+  background: var(--color-brand--3);
+  padding: 1rem;
+  outline: none;
+  border: none;
+  color: white;
+  width: 50%;
+  margin-bottom: -6rem;
+  transition: all 0.25s;
+}
+.btn--clear-all:hover,
+.btn--clear-all:active {
+  background: var(--color-brand--3);
+  filter: brightness(120%);
+}
+.btn--clear-all:active {
+  filter: brightness(100%);
+}
+
+.btn--sort {
+  margin-top: 2rem;
+  width: 50%;
+  cursor: pointer;
+  background: var(--color-brand--4);
+  padding: 1rem;
+  outline: none;
+  border: none;
+  color: white;
+  margin-left: 21rem;
+  transition: all 0.25s;
+}
+.btn--sort:hover,
+.btn--sort:active {
+  background: var(--color-brand--4);
+  filter: brightness(120%);
+}
+.btn--sort:active {
+  filter: brightness(100%);
 }
