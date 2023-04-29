@@ -8,6 +8,7 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const restBtn = document.querySelector('.btn--clear-all');
+const sortBtn = document.querySelector('.btn--sort');
 
 let map, mapEvent;
 
@@ -69,6 +70,8 @@ class App {
   #currentLocation;
 
   constructor() {
+    this.sorted = false;
+
     // Get user's position
     this._getPosition();
 
@@ -80,6 +83,33 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     restBtn.addEventListener('click', this.reset);
+    sortBtn.addEventListener('click', this._sortWorkout.bind(this));
+
+    let lis = containerWorkouts.getElementsByTagName('li');
+
+    console.log(lis);
+    console.log(lis.length);
+  }
+
+  _sortWorkout(e) {
+    e.preventDefault();
+
+    // First make a deep copy of workout
+    let CopiedWorkout = JSON.parse(JSON.stringify(this.#workouts));
+
+    //To remove previous workout render list
+    let lis = containerWorkouts.getElementsByTagName('li');
+    // convert HTMLCollection to array becase HTMLCollection index update in real time once remove any element in it.
+    let lisArray = Array.from(lis);
+    lisArray.forEach(workout => containerWorkouts.removeChild(workout));
+
+    if (!this.sorted) {
+      // workouts.slice().sort((a, b) => a - b);
+      CopiedWorkout = CopiedWorkout.sort((a, b) => a.distance - b.distance);
+    }
+    this.sorted = !this.sorted;
+
+    CopiedWorkout.forEach(workout => this._renderWorkout(workout));
   }
   _getLocalStorage() {
     // Convert data from string to object
@@ -89,8 +119,6 @@ class App {
 
     // To restore an object's prototype after retrieving from local storage
     const data = dataJson.map(workout => {
-      console.log(workout.type);
-
       if (workout.type == 'running')
         return Object.setPrototypeOf(workout, Running.prototype);
 
