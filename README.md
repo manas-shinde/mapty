@@ -1,6 +1,6 @@
 <img src="https://github.com/manas-shinde/mapty/blob/development/Screenshot.png?raw=true" ></img>
 
-# Mapty
+# [Mapty (Map your workouts)](https://manas-shinde.github.io/mapty/)
 
 Mapty is not just any ordinary map application - it's a revolutionary tool that will transform the way you work out! With its cutting-edge Vanilla JavaScript technology, Mapty allows you to store your workouts with unparalleled ease and precision.
 
