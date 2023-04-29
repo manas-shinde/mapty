@@ -16,3 +16,13 @@ In short, Mapty is not just a map application - it's a game-changing tool that w
 - CSS
 - Vanilla JavaScript
 - Leaflet API
+
+## Working
+
+#### Architecture
+
+<img src="https://github.com/manas-shinde/mapty/blob/main/Mapty-architecture-final.png" width=800px/>
+
+#### Flowchart
+
+<img src="https://github.com/manas-shinde/mapty/blob/main/Mapty-flowchart.png" width=800px />
