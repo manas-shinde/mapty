@@ -7,6 +7,9 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const restBtn = document.querySelector('.btn--clear-all');
+const sortBtn = document.querySelector('.btn--sort');
+
 let map, mapEvent;
 
 class Workout {
@@ -42,6 +45,7 @@ class Running extends Workout {
     return this.pace;
   }
 }
+
 class Cycling extends Workout {
   type = 'cycling';
 
@@ -62,17 +66,72 @@ class App {
   #map;
   #mapZoomLevel = 13;
   #mapEvent;
-  #workout = [];
+  #workouts = [];
   #currentLocation;
 
   constructor() {
+    this.sorted = false;
+
     // Get user's position
     this._getPosition();
+
+    // Get previous workouts from local storage if exists
+    this._getLocalStorage();
 
     // Attach event handlers
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+    restBtn.addEventListener('click', this.reset);
+    sortBtn.addEventListener('click', this._sortWorkout.bind(this));
+
+    let lis = containerWorkouts.getElementsByTagName('li');
+
+    console.log(lis);
+    console.log(lis.length);
+  }
+
+  _sortWorkout(e) {
+    e.preventDefault();
+
+    // First make a deep copy of workout
+    let CopiedWorkout = JSON.parse(JSON.stringify(this.#workouts));
+
+    //To remove previous workout render list
+    let lis = containerWorkouts.getElementsByTagName('li');
+    // convert HTMLCollection to array becase HTMLCollection index update in real time once remove any element in it.
+    let lisArray = Array.from(lis);
+    lisArray.forEach(workout => containerWorkouts.removeChild(workout));
+
+    if (!this.sorted) {
+      // workouts.slice().sort((a, b) => a - b);
+      CopiedWorkout = CopiedWorkout.sort((a, b) => a.distance - b.distance);
+    }
+    this.sorted = !this.sorted;
+
+    CopiedWorkout.forEach(workout => this._renderWorkout(workout));
+  }
+  _getLocalStorage() {
+    // Convert data from string to object
+    const dataJson = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!dataJson) return;
+
+    // To restore an object's prototype after retrieving from local storage
+    const data = dataJson.map(workout => {
+      if (workout.type == 'running')
+        return Object.setPrototypeOf(workout, Running.prototype);
+
+      if (workout.type == 'cycling')
+        return Object.setPrototypeOf(workout, Cycling.prototype);
+    });
+
+    this.#workouts = data;
+
+    // Render workout list only, not markers becase map may not be loaded yet.
+    this.#workouts.forEach(workout => {
+      this._renderWorkout(workout);
+    });
   }
 
   _getPosition() {
@@ -107,7 +166,16 @@ class App {
     toastMessage('app loaded');
 
     this._renderCurrentLocationMarker(this.#currentLocation);
+
+    //IF workouts are present in workout list then only render those workout
+    if (this.#workouts) {
+      this.#workouts.forEach(workout => {
+        this._renderWorkoutMarker(workout);
+        this._drawLine(workout);
+      });
+    }
   }
+
   _renderCurrentLocationMarker(coords) {
     L.marker(coords)
       .addTo(this.#map)
@@ -122,11 +190,13 @@ class App {
       .setPopupContent(`📍 Current Location`)
       .openPopup();
   }
+
   _showForm(mapEv) {
     this.#mapEvent = mapEv;
     form.classList.remove('hidden');
     inputDistance.focus();
   }
+
   _hideForm() {
     // Empty the form fields
     inputDistance.value =
@@ -190,7 +260,7 @@ class App {
 
     // Add new object to workout array
 
-    this.#workout.push(workout);
+    this.#workouts.push(workout);
 
     // render workout on map marker
     this._renderWorkoutMarker(workout);
@@ -198,9 +268,19 @@ class App {
     // render workout on list
     this._renderWorkout(workout);
 
+    // To draw line from current location to workout location
     this._drawLine(workout);
 
+    // Hide the form that used to get the data from user for workout
     this._hideForm();
+
+    console.log(workout);
+    // Store the new workout data in local storage
+    this._setLocalStorage();
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
@@ -219,6 +299,7 @@ class App {
       )
       .openPopup();
   }
+
   _drawLine(workout) {
     // Get the value of the --color-brand--1 variable
     let colorBrand1 = getComputedStyle(
@@ -287,6 +368,7 @@ class App {
     }
     form.insertAdjacentHTML('afterend', html);
   }
+
   _moveToPopup(e) {
     if (!this.#map) return;
 
@@ -294,7 +376,7 @@ class App {
 
     if (!workoutElement) return;
 
-    const workout = this.#workout.find(
+    const workout = this.#workouts.find(
       workout => workout.id == workoutElement.dataset.id
     );
 
@@ -302,6 +384,12 @@ class App {
       animation: true,
       pan: { duration: 1 },
     });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    toastMessage('Removed all the workouts from the storage!');
+    location.reload();
   }
 }
 
